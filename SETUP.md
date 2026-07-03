@@ -44,19 +44,21 @@ Don't run `0004_seed_products.sql` or `0005_add_product_features.sql` yet — do
 
 ## 4. Configure frontend environment variables
 
-In the project root, copy the example env file:
+In the project root, copy the example env file to `.env.local` (Vite's standard name for your personal, untracked API keys — it's already in `.gitignore` and Vite loads it automatically, no code changes needed; plain `.env` also works if you prefer):
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Fill in `.env` with the values from step 1.4 — **real values, not the placeholders**:
+Fill in `.env.local` with the values from step 1.4 — **real values, not the placeholders**:
 
 ```
 VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon public key>
 VITE_RAZORPAY_KEY_ID=<from step 7 below>
 ```
+
+Restart `npm run dev` any time you change this file — Vite only reads env files at startup.
 
 Then install dependencies and run the app locally:
 
@@ -65,7 +67,7 @@ npm install
 npm run dev
 ```
 
-If `.env` still has placeholder/example values (or is missing), every page will look empty since the app can't reach any database — this is the other common cause of "no products found."
+If `.env.local` still has placeholder/example values (or is missing), every page will look empty since the app can't reach any database — this is the other common cause of "no products found."
 
 ## 5. Create your admin account
 
@@ -100,7 +102,7 @@ That's it — no extra account or cost, unlike phone/SMS OTP (not implemented in
 
 1. Sign up at [razorpay.com](https://razorpay.com) (or log in) and switch to **Test Mode** (top-left toggle) for now.
 2. Go to **Settings → API Keys → Generate Test Key**. Copy the **Key ID** and **Key Secret**.
-3. Put the **Key ID** into your frontend `.env` as `VITE_RAZORPAY_KEY_ID` (step 4 above).
+3. Put the **Key ID** into your frontend `.env.local` as `VITE_RAZORPAY_KEY_ID` (step 4 above).
 4. The **Key Secret** must never go in frontend code — it's used only by the Edge Functions (next step).
 
 ### Install the Supabase CLI and deploy the Edge Functions
@@ -158,7 +160,7 @@ git push
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project** → import `sketchbybala-ui/Aqua-guide` from GitHub.
 2. Framework preset: **Vite** (should auto-detect). Build command `npm run build`, output directory `dist` (defaults are correct).
-3. Add these Environment Variables in the Vercel project settings (same values as your local `.env`):
+3. Add these Environment Variables in the Vercel project settings (same values as your local `.env.local`):
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_RAZORPAY_KEY_ID`
@@ -178,7 +180,7 @@ git push
 
 Work through these in order — each one has caused this exact symptom:
 
-1. **Check `.env` has real values.** Open `.env` in the project root and confirm `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are your actual project's values, not the `placeholder`/`YOUR_PROJECT_REF` example text. Restart `npm run dev` after editing `.env` — Vite only reads it at startup.
+1. **Check `.env.local` has real values.** Open `.env.local` in the project root and confirm `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are your actual project's values, not the `placeholder`/`YOUR_PROJECT_REF` example text. Restart `npm run dev` after editing `.env.local` — Vite only reads it at startup.
 2. **Check the seed data actually landed.** In the Supabase SQL Editor: `select count(*) from products;`. Should be `22`. If `0`, go back to step 3 above and run `0004_seed_products.sql`.
 3. **Check the browser console** (F12 → Console) for errors while on a product/category page. A `Failed to fetch` or DNS-style error means step 1 (env vars) is the issue. A `permission denied for table products` or similar means RLS/migration 0002 didn't apply — re-run `0002_rls_policies.sql`.
 4. **Check you're not filtering everything out accidentally** — the Admin → Manage Products list shows every product regardless of `is_active`; the public storefront only shows `is_active = true` ones. If you've been editing products in Admin, make sure "Active (visible in store)" is checked.
