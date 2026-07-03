@@ -11,9 +11,13 @@ export function useProducts({ categorySlug } = {}) {
     async function run() {
       setLoading(true)
       setError(null)
+      // !inner turns the embedded category filter into a real join
+      // condition on the parent rows — without it, PostgREST only
+      // decides whether to populate `category` per row (left join
+      // semantics) and never actually excludes non-matching products.
       let query = supabase
         .from('products')
-        .select('*, category:categories(slug, name)')
+        .select('*, category:categories!inner(slug, name)')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
 
@@ -27,9 +31,7 @@ export function useProducts({ categorySlug } = {}) {
         setError(err)
         setProducts([])
       } else {
-        // when filtering by category via embedded resource, rows whose
-        // category doesn't match come back with category: null — drop them
-        setProducts(categorySlug ? (data ?? []).filter((p) => p.category) : data ?? [])
+        setProducts(data ?? [])
       }
       setLoading(false)
     }
