@@ -23,7 +23,7 @@ In the Supabase Dashboard, go to **SQL Editor → New query**, and run each file
 2. `0002_rls_policies.sql` — enables Row Level Security and creates all policies.
 3. `0003_storage.sql` — creates the `product-images` Storage bucket and its policies.
 
-Don't run `0004_seed_products.sql` yet — do step 3 first, since the seed data needs real image URLs.
+Don't run `0004_seed_products.sql` or `0005_add_product_features.sql` yet — do step 3 first, since the seed data needs real image URLs.
 
 **Verify each ran cleanly** before moving on — the SQL Editor shows a green "Success" per statement. If any migration errors partway through, fix the error and re-run that whole file before continuing; a partially-applied migration is the most common cause of "empty" pages later.
 
@@ -37,7 +37,8 @@ Don't run `0004_seed_products.sql` yet — do step 3 first, since the seed data 
    `https://<your-project-ref>.supabase.co/storage/v1/object/public/product-images/home-use/home-collage-1.jpg`
 4. Open `supabase/migrations/0004_seed_products.sql` in this repo and **find-and-replace** `YOUR_PROJECT_REF` with your actual project ref (from step 1.4) throughout the file.
 5. Back in the SQL Editor, run the now-updated `0004_seed_products.sql`. This inserts the 2 categories and all 22 products.
-6. Confirm it worked: run `select count(*) from products;` in the SQL Editor — it should return `22`. If it returns `0`, the seed file didn't run (see Troubleshooting at the bottom).
+6. Run `0005_add_product_features.sql` — adds a bullet-point "features" list to each product (shown on the product detail page) and fills it in for all 22 seeded products.
+7. Confirm it worked: run `select count(*) from products;` in the SQL Editor — it should return `22`. If it returns `0`, the seed file didn't run (see Troubleshooting at the bottom).
 
 > Note: the 17 Home Use products currently reuse 2 shared "collage" placeholder photos (the original source images had multiple products per photo). Swap in individual product photos any time via **Admin → Manage Products → Edit** once the app is running.
 

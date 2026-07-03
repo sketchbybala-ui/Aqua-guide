@@ -22,6 +22,7 @@ const emptyProduct = {
   stock_quantity: 0,
   is_active: true,
   image_url: '',
+  features: [],
 }
 
 export default function AdminProductForm() {
@@ -31,6 +32,7 @@ export default function AdminProductForm() {
 
   const [categories, setCategories] = useState([])
   const [product, setProduct] = useState(emptyProduct)
+  const [featuresText, setFeaturesText] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
@@ -48,7 +50,10 @@ export default function AdminProductForm() {
     if (!isEditing) return
     async function loadProduct() {
       const { data } = await supabase.from('products').select('*').eq('id', productId).single()
-      if (data) setProduct(data)
+      if (data) {
+        setProduct(data)
+        setFeaturesText((data.features ?? []).join('\n'))
+      }
       setLoading(false)
     }
     loadProduct()
@@ -92,6 +97,10 @@ export default function AdminProductForm() {
         stock_quantity: Number(product.stock_quantity),
         is_active: product.is_active,
         image_url: imageUrl,
+        features: featuresText
+          .split('\n')
+          .map((f) => f.trim())
+          .filter(Boolean),
       }
 
       if (isEditing) {
@@ -176,6 +185,17 @@ export default function AdminProductForm() {
             required
             value={product.stock_quantity}
             onChange={(e) => updateField('stock_quantity', e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-slate-700">Features (one per line)</label>
+          <textarea
+            rows={4}
+            placeholder={'Multi-stage RO purification\nCompact wall-mountable design'}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            value={featuresText}
+            onChange={(e) => setFeaturesText(e.target.value)}
           />
         </div>
 
